@@ -1,10 +1,6 @@
 import { useState } from "react";
 
-interface UserNameInputProps {
-  saveUserName: (userName: string) => void;
-}
-
-export const UserNameInput = ({ saveUserName }: UserNameInputProps) => {
+export const UserNameInput = ({ saveUserName }: any) => {
   const [userName, setUserName] = useState<string>('');
 
   return (
@@ -16,6 +12,11 @@ export const UserNameInput = ({ saveUserName }: UserNameInputProps) => {
           className="px-2 flex-1 rounded-l h-12 text-gray-900"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              saveUserName(userName);
+            }
+          }}
           placeholder="Enter your name"
         />
         <button className="bg-blue-500 p-2 rounded-r h-12" onClick={() => saveUserName(userName)}>

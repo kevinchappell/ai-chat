@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 function useIsScrolledToBottom(ref: React.RefObject<HTMLElement>) {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
 
-  const checkIfScrolledToBottom = () => {
+  const checkIfScrolledToBottom = useCallback(() => {
     if (!ref.current) {
       return
     }
     const { scrollTop, scrollHeight, clientHeight } = ref.current
     setIsScrolledToBottom(scrollTop + clientHeight >= scrollHeight)
-  }
+  }, [ref])
 
   useEffect(() => {
     const element = ref.current
@@ -21,7 +21,7 @@ function useIsScrolledToBottom(ref: React.RefObject<HTMLElement>) {
     return () => {
       element?.removeEventListener('scroll', checkIfScrolledToBottom)
     }
-  }, [ref])
+  }, [ref, checkIfScrolledToBottom])
 
   return isScrolledToBottom
 }

@@ -7,7 +7,6 @@ type Storable = string | number | boolean | object | null
 const isNullOrUndefined = (value: any): value is null | undefined => value === null || value === undefined
 
 const localStorageCache: Record<string, Storable> = {}
-
 const localStorage = {
   set: (key: string, value: Storable) => {
     if (isNullOrUndefined(value)) {
