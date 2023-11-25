@@ -37,5 +37,5 @@ export async function POST(req: Request) {
     presence_penalty: 0.5,
   })
 
-  return Response.json(message)
+  return Response.json(message, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } })
 }
