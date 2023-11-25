@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useCallback, useContext, useMemo } from 'react';
+import { useLocalStorage } from '@react-hooks-library/core'
 import { ChatContextType, MessageType, SendTypes } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { api } from '../utils/api';
 import { TypingIndicator } from '../components/TypingIndicator';
 
@@ -27,16 +27,17 @@ export const ChatProvider = ({ children, userName }: ChatProviderProps) => {
   const sendMessage = useCallback((content: string) => {
     const userMessage = makeMessage(content, SendTypes.USER);
     const aiTypingMessage = makeMessage(<TypingIndicator />, SendTypes.AI, true);
-    setMessages((prev) => [...prev, userMessage, aiTypingMessage]);
+    messages.push(userMessage, aiTypingMessage);
+    setMessages([...messages]);
     api.post('/chat/completions', userMessage).then((resp) => {
-      if (!resp?.data) {
-        const message = makeMessage('Sorry, I did not understand that.', SendTypes.AI);
-        return setMessages((prev) => [...prev.slice(0, -1), message]);
-      };
-      const aiMessage = makeMessage(resp.data.content, SendTypes.AI);
-      setMessages((prev) => [...prev.slice(0, -1), aiMessage]);
-    });
-  }, [setMessages]);
+      const aiMessage = makeMessage(resp?.data.content, SendTypes.AI);
+      setMessages([...messages.slice(0, -1), aiMessage]);
+    }).catch((err) => {
+      console.error(err);
+      const message = makeMessage('Sorry, I did not understand that.', SendTypes.AI);
+      setMessages([...messages.slice(0, -1), message]);
+    })
+  }, [messages, setMessages]);
 
   const value = useMemo(() => ({ messages, sendMessage }), [messages, sendMessage]);
 

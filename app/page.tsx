@@ -1,8 +1,8 @@
 'use client'
 
+import { useLocalStorage } from '@react-hooks-library/core'
 import ChatInterface from './components/ChatInterface';
 import { UserNameInput } from './components/UserNameInput';
-import { useLocalStorage } from './hooks/useLocalStorage';
 
 const Home = () => {
   const [userName, setUserName] = useLocalStorage('userName', '');
