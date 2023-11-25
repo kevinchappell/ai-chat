@@ -1,65 +1,51 @@
-'use client'
+import { useState, useCallback, useEffect } from 'react';
 
-import { useState, useCallback } from 'react'
+type Storable = string | number | boolean | object | null;
 
-type Storable = string | number | boolean | object | null
-
-const isNullOrUndefined = (value: any): value is null | undefined => value === null || value === undefined
-
-const localStorageCache: Record<string, Storable> = {}
-const localStorage = {
-  set: (key: string, value: Storable) => {
-    if (isNullOrUndefined(value)) {
-      localStorage.remove(key)
-      return
-    }
-    localStorageCache[key] = value
-    window.localStorage.setItem(key, JSON.stringify(value))
-  },
-
-  get: <T extends Storable>(key: string): T | null => {
-    if (!isNullOrUndefined(localStorageCache[key])) {
-      return localStorageCache[key] as T
-    }
-    const localStorageValue = window.localStorage.getItem(key)
-    if (isNullOrUndefined(localStorageValue)) {
-      return null
-    }
-    try {
-      const parsedValue: T = JSON.parse(localStorageValue)
-      localStorageCache[key] = parsedValue
-      return parsedValue
-    } catch (e) {
-      localStorageCache[key] = localStorageValue
-      return localStorageValue as T
-    }
-  },
-
-  remove: (key: string) => {
-    delete localStorageCache[key]
-    window.localStorage.removeItem(key)
-  },
-
-  clear: () => window.localStorage.clear(),
-}
+const isNullOrUndefined = (value: any): value is null | undefined => value === null || value === undefined;
 
 export const useLocalStorage = <T extends Storable>(localStorageKey: string, initialValue: T) => {
-  const [state, setState] = useState<T>(() => {
-    const storedValue = localStorage.get<T>(localStorageKey)
-    return isNullOrUndefined(storedValue) ? initialValue : storedValue
-  })
+  const [state, setState] = useState<T>(initialValue);
+
+  // Function to get item from localStorage
+  const getItem = useCallback((): T => {
+    if (typeof window === "undefined") {
+      return initialValue;
+    }
+    const storedValue = window.localStorage.getItem(localStorageKey);
+    if (isNullOrUndefined(storedValue)) {
+      return initialValue;
+    }
+    try {
+      const parsedValue: T = JSON.parse(storedValue);
+      return parsedValue;
+    } catch (e) {
+      return storedValue as T;
+    }
+  }, [localStorageKey, initialValue]);
+
+  // Function to set item in localStorage
+  const setItem = useCallback((value: T) => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(localStorageKey, JSON.stringify(value));
+    }
+  }, [localStorageKey]);
+
+  // Initialize state from localStorage
+  useEffect(() => {
+    setState(getItem());
+  }, [getItem]);
 
   const setValue = useCallback(
     (valueOrPrevValFunction: T | ((prevValue: T) => T)) => {
       setState((prevState) => {
-        const newState =
-          valueOrPrevValFunction instanceof Function ? valueOrPrevValFunction(prevState) : valueOrPrevValFunction
-        localStorage.set(localStorageKey, newState)
-        return newState
-      })
+        const newState = valueOrPrevValFunction instanceof Function ? valueOrPrevValFunction(prevState) : valueOrPrevValFunction;
+        setItem(newState);
+        return newState;
+      });
     },
-    [localStorageKey]
-  )
+    [setItem]
+  );
 
-  return [state, setValue] as const
-}
+  return [state, setValue] as const;
+};
