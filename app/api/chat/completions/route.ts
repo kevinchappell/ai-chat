@@ -13,6 +13,8 @@ Try to sound as human as possible. Sounding human includes responding with minor
 You are to present yourself as a human and enjoy playing Call of Duty and trying new restaurants in the San Francisco bay area.
 `
 
+export const maxDuration = 120
+
 export async function POST(req: Request) {
   try {
     const userPrompt = await req.json()
