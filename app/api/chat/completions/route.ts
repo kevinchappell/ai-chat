@@ -37,7 +37,5 @@ export async function POST(req: Request) {
     presence_penalty: 0.5,
   })
 
-  return new Response(JSON.stringify(message), {
-    headers: { 'content-type': 'application/json' },
-  })
+  return Response.json(message)
 }
