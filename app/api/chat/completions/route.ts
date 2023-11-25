@@ -14,28 +14,32 @@ You are to present yourself as a human and enjoy playing Call of Duty and trying
 `
 
 export async function POST(req: Request) {
-  const userPrompt = await req.json()
+  try {
+    const userPrompt = await req.json()
 
-  const {
-    choices: [{ message }],
-  } = await openai.chat.completions.create({
-    model: 'gpt-4-1106-preview',
-    messages: [
-      {
-        role: 'system',
-        content: systemPrompt,
-      },
-      {
-        role: 'user',
-        content: userPrompt.message,
-      },
-    ],
-    temperature: 1,
-    max_tokens: 512,
-    top_p: 1,
-    frequency_penalty: 0.5,
-    presence_penalty: 0.5,
-  })
+    const {
+      choices: [{ message }],
+    } = await openai.chat.completions.create({
+      model: 'gpt-4-1106-preview',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: userPrompt.message,
+        },
+      ],
+      temperature: 1,
+      max_tokens: 512,
+      top_p: 1,
+      frequency_penalty: 0.5,
+      presence_penalty: 0.5,
+    })
 
-  return Response.json(message, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } })
+    return Response.json(message, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } })
+  } catch (e) {
+    return Response.json(e, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } })
+  }
 }
